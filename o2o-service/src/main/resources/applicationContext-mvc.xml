@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd   
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.1.xsd   
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.1.xsd   
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.1.xsd
+       http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.1.xsd">
+
+	<!-- 属性配置文件 -->
+	<context:property-placeholder location="classpath:/config.properties" />
+
+	<!-- Activates annotation-based bean configuration -->
+	<context:annotation-config />
+
+	<!-- 设置使用注解的类所在的jar包,base-package应避免和applicationContext冲突，造成事务失效 -->
+	<context:component-scan base-package="com.o2o.controller"
+		use-default-filters="false">
+		<context:include-filter type="annotation"
+			expression="org.springframework.stereotype.Controller" />
+	</context:component-scan>
+
+	<!-- 配置静态资源 -->
+	<mvc:resources location="/resources/" mapping="/resources/**" />
+
+	<!-- 完成请求和注解POJO的映射 -->
+	<mvc:annotation-driven
+		content-negotiation-manager="contentNegotiationManager">
+		<!-- 参数的处理 -->
+		<mvc:argument-resolvers>
+			<bean class="com.o2o.web.RequestResponeJsonMethodProcessor">
+	        	<constructor-arg>
+	    			<list>
+	    				<ref bean="jackson_hmc" />
+	    			</list>
+	    		</constructor-arg>
+	        </bean>
+			<bean class="com.o2o.web.WXQueryInfoArgumentResolver" />
+			<bean class="com.o2o.web.RequestParam2ArgumentResolver" />			
+		</mvc:argument-resolvers>
+		<!-- 转换处理 -->
+		<mvc:message-converters>
+			<bean class="org.springframework.http.converter.StringHttpMessageConverter">
+				<property name="supportedMediaTypes">
+					<list>
+						<value>text/plain;charset=UTF-8</value>
+						<value>text/html;charset=UTF-8</value>
+					</list>
+				</property>
+			</bean>
+			<ref bean="jackson_hmc" />
+		</mvc:message-converters>
+		<!-- 返回值处理 -->
+		<mvc:return-value-handlers>
+		</mvc:return-value-handlers>
+	</mvc:annotation-driven>
+
+	<bean id="contentNegotiationManager"
+		class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+		<property name="favorPathExtension" value="true" />
+		<property name="favorParameter" value="true" />
+		<property name="defaultContentType" value="text/html" />
+		<property name="mediaTypes">
+			<value>
+				json=application/json
+				xml=application/xml
+			</value>
+		</property>
+	</bean>
+
+	<!-- 启动springmvc的注解映射功能 -->
+	<bean
+		class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
+		<property name="order" value="1" />
+	</bean>
+
+	<!-- Hessian 启动BeanNameMapping 映射功能 -->
+	<bean
+		class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping">
+		<property name="defaultHandler" ref="httpRequestHandlerAdapter" />
+		<property name="order" value="2" />
+	</bean>
+
+	<!-- 启动springmvc的注解功能 -->
+	<bean
+		class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter" />
+
+	<!-- 处理httpRequest的Adapter -->
+	<bean id="httpRequestHandlerAdapter"
+		class="org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter"></bean>
+	
+	<!-- 对转向页面的路径解析。prefix：前缀， suffix：后缀 -->
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver"
+		p:prefix="/" p:suffix=".jsp">
+	</bean>
+
+	<!-- JSON(包括解决汉字乱码) -->
+	<bean id="jackson_hmc" class="com.o2o.web.WXMappingJacksonHttpMessageConverter">
+	</bean>
+
+	<!-- 配置 文件上传的支持 -->
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxUploadSize" value="1024000000" />
+		<property name="resolveLazily" value="true" />
+		<property name="maxInMemorySize" value="4096" />
+	</bean>
+
+	<bean id="exceptionResolver"
+		class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+		<property name="defaultErrorView" value="/views/system/error.jsp" />
+		<property name="exceptionMappings">
+			<props>
+
+			</props>
+		</property>
+	</bean>
+</beans>

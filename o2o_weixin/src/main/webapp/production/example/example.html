@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="format-detection" content="telephone=no,email=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<title>jquery-mobile</title>
+    <!-- <script type="text/javascript" src="http://7xvbfr.com1.z0.glb.clouddn.com/jquery-3.0.0.min.js"></script> -->
+    <script type="text/javascript" src="../../common_jqm/core/jquery.js"></script>
+    <script type="text/javascript" src=" http://7xvbfr.com1.z0.glb.clouddn.com/template.js"></script>
+    <script type="text/javascript" src="../../production/example/example.js"></script>
+    <script type="text/javascript" src="../../common_jqm/jqm/jquery.mobile.js"></script>
+    <style type="text/css" src="../../common_jqm/jqm/jquery.mobile.css"></style>
+</head>
+<body>
+<script type="text/html">
+ <div data-role="header"  class="header" style="position:relative;">
+   {{include 'head'}}
+ </div>  
+</script>
+
+<div data-role="content" id="content">
+
+</div>
+
+<div data-role="footer"></div>
+
+<script type="text/html" id="head">
+   
+    <span class="font-size16" style="color:blue;" >
+            <span class="sele-businessname">我要报价</span>
+        </span>
+      
+</script>
+
+
+<script id="test" type="text/html">
+<h1>{{title}}</h1>
+{{include 'list'}}
+{{include 'list2'}}
+</script>
+
+<script id="list" type="text/html">
+<ul>
+    {{each list as value i}}
+        <li>索引 {{i + 1}} ：{{value}}</li>
+    {{/each}}
+</ul>
+</script>
+
+<script id="list2" type="text/html">
+<section>
+   <button style="margin-top: 5%;margin-left: 35%;text-align: center;" class="btn_example" style="width:100px">点击我</button>
+</section>
+</script>
+
+
+<script>
+var data = {
+	title: '嵌入子模板',
+	list: ['文艺', '博客', '摄影', '电影', '民谣', '旅行', '吉他']
+};
+var html = template('test', data);
+document.getElementById('content').innerHTML = html;
+</script>
+</body>
+</html>

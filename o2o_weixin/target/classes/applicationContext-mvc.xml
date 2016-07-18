@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:websocket="http://www.springframework.org/schema/websocket"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd   
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.1.xsd   
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.1.xsd   
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.1.xsd
+       http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.1.xsd
+       http://www.springframework.org/schema/websocket http://www.springframework.org/schema/websocket/spring-websocket-4.1.xsd">
+
+	<!-- 属性配置文件 -->
+	<context:property-placeholder location="classpath:/config.properties" />
+
+	<!-- Activates annotation-based bean configuration -->
+	<context:annotation-config />
+	
+	<!-- 设置使用注解的类所在的jar包,base-package应避免和applicationContext冲突，造成事务失效 -->
+	<context:component-scan base-package="com.o2o.weixin.controller"	use-default-filters="false">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+	</context:component-scan>
+
+	<!-- 配置静态资源 -->
+	<mvc:resources location="/resources/" mapping="/resources/**" />
+
+	<bean id="contentNegotiationManager"
+		class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+		<property name="favorPathExtension" value="true" />
+		<property name="favorParameter" value="true" />
+		<property name="defaultContentType" value="text/html" />
+		<property name="mediaTypes">
+			<value>
+				json=application/json
+				xml=application/xml
+			</value>
+		</property>
+	</bean>
+
+	<!-- 启动springmvc的注解映射功能 -->
+	<bean
+		class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
+		<property name="order" value="1" />
+	</bean>
+	
+	<!-- 启动springmvc的注解功能 -->
+	<bean
+		class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter" />
+
+	<!-- 处理httpRequest的Adapter -->
+	<bean id="httpRequestHandlerAdapter" class="org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter"></bean>
+	
+	<bean id="viewResolver" class="com.o2o.weixin.web.MultiViewResolver">
+        <property name="defaultViewResolver" ref="jspViewResolver"/>
+        <property name="defaultSuffix" value=".jsp" />
+        <property name="viewResolverMap">
+            <map>
+                <entry>
+                    <key>
+                        <set>
+                            <value>.jsp</value>
+                        </set>
+                    </key>
+                    <ref bean="jspViewResolver"/>
+                </entry>               
+                <entry>
+                    <key><value>.ftl</value></key><!-- 这里用freemarkerViewResolver解析freemarker的视图模板 -->
+                    <ref bean="freemarkerViewResolver"/>
+                </entry>
+                <entry>
+                    <key><value>.html</value></key><!-- 这里用freemarkerViewResolver解析html -->
+                    <ref bean="freemarkerViewResolver"/>
+                </entry>
+            </map>
+        </property>
+    </bean>
+	
+	<bean id="beanNameViewResolver" class="org.springframework.web.servlet.view.BeanNameViewResolver"/>
+
+	<!--通用的对转向页面的路径解析。prefix：前缀， suffix：后缀 -->
+	<bean id="jspViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
+        <property name="prefix" value="/"/>
+    </bean>
+	
+	<!-- freemarker的配置 -->  
+    <bean id="freemarkerConfigurer"  
+        class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">  
+        <property name="templateLoaderPath" value="/" />  
+        <property name="defaultEncoding" value="UTF-8" />  
+        <property name="freemarkerSettings">  
+            <props>  
+                <prop key="template_update_delay">10</prop>  
+                <prop key="locale">zh_CN</prop>                
+                <prop key="date_format">yyyy-MM-dd</prop>  
+                <prop key="time_format">HH:mm:ss</prop>  
+                <prop key="datetime_format">yyyy-MM-dd HH:mm:ss</prop>  
+                <prop key="number_format">#.##</prop> 
+                <prop key="classic_compatible">false</prop>
+                <prop key="template_exception_handler">ignore</prop><!-- springmvc --> 
+            </props>  
+        </property>  
+    </bean>  
+    <!-- FreeMarker视图解析 如返回userinfo。。在这里配置后缀名ftl和视图解析器。。 -->  
+    <bean id="freemarkerViewResolver"  
+        class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver">  
+        <property name="viewClass"  value="org.springframework.web.servlet.view.freemarker.FreeMarkerView" />          
+        <property name="contentType" value="text/html;charset=UTF-8" />  
+        <property name="exposeRequestAttributes" value="true" />  
+        <property name="exposeSessionAttributes" value="true" />  
+        <property name="exposeSpringMacroHelpers" value="true" />
+        <property name="cache" value="true" />
+    </bean>
+
+	<!-- JSON(包括解决汉字乱码) -->
+	<bean id="jackson_hmc" class="com.o2o.weixin.web.WXMappingJacksonHttpMessageConverter">
+		<property name="supportedMediaTypes">
+			<list>
+				<value>text/plain;charset=UTF-8</value>
+				<value>text/html;charset=UTF-8</value>
+				<value>application/json;charset=UTF-8</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="exceptionResolver"
+		class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+		<property name="defaultErrorView" value="/views/system/error.jsp" />
+		<property name="exceptionMappings">
+			<props>
+
+			</props>
+		</property>
+	</bean>
+</beans>

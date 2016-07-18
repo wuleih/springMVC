@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- create by autoCode,v1.0.0 -->
+<mapper namespace="com.o2o.po.ExampleMapper">
+
+	<select id="count" resultType="java.lang.Integer">
+		select count(*)  from t_activity_management  
+	</select>
+	
+</mapper>

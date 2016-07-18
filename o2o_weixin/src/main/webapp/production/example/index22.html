@@ -1,0 +1,19 @@
+<script type="text/html" id="test">
+   {{Title}}
+   {{include 'list'}}
+   {{include 'test2'}}
+    <p>点我到下一页</p>
+    <a href="#pagetwo" data-transition="turn">哈哈，跑到下一页</a>
+</script>
+
+<script id="list" type="text/html">
+<ul>
+    {{each list as value i}}
+        <li>这是什么{{i + 1}} 俺不知道啊{{value}}</li>
+    {{/each}}
+</ul>
+</script>
+
+<script id="test2" type="text/html">  
+        helper的用法:::{{add(n)}}  
+</script>
